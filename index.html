@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>性格类型预测</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --primary-color: #6a5acd;
@@ -13,6 +14,8 @@
             --dark-color: #191970;
             --success-color: #4caf50;
             --warning-color: #ff9800;
+            --introvert-color: #3f51b5;
+            --extrovert-color: #ff9800;
         }
         
         * {
@@ -26,16 +29,24 @@
             line-height: 1.6;
             color: #333;
             background-color: var(--light-color);
+            background-image: linear-gradient(135deg, var(--light-color) 0%, #fff 100%);
             padding: 20px;
+            min-height: 100vh;
         }
         
         .container {
             max-width: 800px;
             margin: 0 auto;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             padding: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
         
         h1 {
@@ -43,10 +54,39 @@
             color: var(--primary-color);
             margin-bottom: 30px;
             font-weight: 600;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+        
+        .intro-text {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 16px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .form-group {
             margin-bottom: 25px;
+            transition: transform 0.2s ease;
+        }
+        
+        .form-group:hover {
+            transform: translateX(5px);
         }
         
         label {
@@ -54,120 +94,298 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--dark-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        label i {
+            margin-right: 8px;
+            color: var(--primary-color);
         }
         
         select, input[type="range"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
             color: #555;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
         }
         
-        select:focus {
+        select:focus, input[type="range"]:focus {
             border-color: var(--primary-color);
             outline: none;
-            box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.2);
+            box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+            background-color: #fff;
+        }
+        
+        select:hover, input[type="range"]:hover {
+            border-color: var(--secondary-color);
         }
         
         .radio-group {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
+            margin-top: 10px;
         }
         
         .radio-option {
             display: flex;
             align-items: center;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .radio-option:hover {
+            background-color: #e9e9ff;
+            transform: translateY(-2px);
         }
         
         .radio-option input[type="radio"] {
             margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .radio-option input[type="radio"]:checked + label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .radio-option.selected {
+            background-color: rgba(106, 90, 205, 0.1);
+            border-color: var(--primary-color);
         }
         
         button {
             display: block;
             width: 100%;
-            padding: 12px;
-            background-color: var(--primary-color);
+            padding: 15px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 90, 205, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
         
         button:hover {
-            background-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(106, 90, 205, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+        
+        button:hover::before {
+            left: 100%;
         }
         
         .result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 5px;
+            margin-top: 40px;
+            padding: 30px;
+            border-radius: 12px;
             text-align: center;
             display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        
+        .result.show {
+            transform: scale(1);
+            opacity: 1;
         }
         
         .result h2 {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: var(--dark-color);
+            font-size: 28px;
         }
         
         .result p {
-            font-size: 18px;
-            font-weight: 500;
-        }
-        
-        .result.introvert {
-            background-color: #e8f5e9;
-            border: 1px solid #c8e6c9;
-        }
-        
-        .result.extrovert {
-            background-color: #fff8e1;
-            border: 1px solid #ffecb3;
-        }
-        
-        .result-icon {
-            font-size: 48px;
+            font-size: 22px;
+            font-weight: 600;
             margin-bottom: 15px;
         }
         
+        .result.introvert {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 5px solid var(--introvert-color);
+        }
+        
+        .result.extrovert {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-left: 5px solid var(--extrovert-color);
+        }
+        
+        .result-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
         .description {
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 16px;
-            color: #666;
+            color: #555;
+            line-height: 1.8;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 8px;
         }
         
         .probability {
-            margin-top: 15px;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .traits-container {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .trait {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
             font-size: 14px;
-            color: #777;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .trait.introvert {
+            color: var(--introvert-color);
+            border: 1px solid var(--introvert-color);
+        }
+        
+        .trait.extrovert {
+            color: var(--extrovert-color);
+            border: 1px solid var(--extrovert-color);
+        }
+        
+        .progress-container {
+            margin-top: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.5s ease-in-out;
+            position: relative;
+        }
+        
+        .progress-fill.introvert {
+            background: linear-gradient(to right, #c5cae9, var(--introvert-color));
+        }
+        
+        .progress-fill.extrovert {
+            background: linear-gradient(to right, #ffe0b2, var(--extrovert-color));
         }
         
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             border-top: 4px solid var(--primary-color);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+            border-right: 4px solid var(--secondary-color);
+            border-bottom: 4px solid var(--accent-color);
+            width: 50px;
+            height: 50px;
+            animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
             margin: 0 auto 15px;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        .loading p {
+            font-size: 18px;
+            color: var(--dark-color);
+            font-weight: 500;
+            margin-top: 15px;
+        }
+        
+        .loading .dots {
+            display: inline-block;
+        }
+        
+        .loading .dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
         }
         
         @media (max-width: 600px) {
@@ -185,9 +403,12 @@
 <body>
     <div class="container">
         <h1>性格类型预测</h1>
+        <p class="intro-text">
+            通过回答以下问题，我们将分析您的性格倾向，判断您是更偏向内向型还是外向型。请根据您的真实情况选择最符合的选项。
+        </p>
         <form id="personalityForm">
             <div class="form-group">
-                <label for="time_spent_alone">独处时间占比：</label>
+                <label for="time_spent_alone"><i class="fas fa-user"></i> 独处时间占比：</label>
                 <select id="time_spent_alone" name="time_spent_alone" required>
                     <option value="">请选择</option>
                     <option value="0.1">0-20% (大部分时间与他人相处)</option>
@@ -199,7 +420,7 @@
             </div>
             
             <div class="form-group">
-                <label>公开场合紧张程度：</label>
+                <label><i class="fas fa-users"></i> 公开场合紧张程度：</label>
                 <div class="radio-group">
                     <div class="radio-option">
                         <input type="radio" id="stagefear1" name="stage_fear" value="No" required>
@@ -225,7 +446,7 @@
             </div>
             
             <div class="form-group">
-                <label for="social_event_attendance">社交活动参与频率：</label>
+                <label for="social_event_attendance"><i class="fas fa-calendar-alt"></i> 社交活动参与频率：</label>
                 <select id="social_event_attendance" name="social_event_attendance" required>
                     <option value="">请选择</option>
                     <option value="0.1">每月少于1次</option>
@@ -237,7 +458,7 @@
             </div>
             
             <div class="form-group">
-                <label for="going_outside">外出频率：</label>
+                <label for="going_outside"><i class="fas fa-walking"></i> 外出频率：</label>
                 <select id="going_outside" name="going_outside" required>
                     <option value="">请选择</option>
                     <option value="0.1">几乎不出门</option>
@@ -249,7 +470,7 @@
             </div>
             
             <div class="form-group">
-                <label>社交后疲惫程度：</label>
+                <label><i class="fas fa-battery-half"></i> 社交后疲惫程度：</label>
                 <div class="radio-group">
                     <div class="radio-option">
                         <input type="radio" id="drained1" name="drained_after_socializing" value="No" required>
@@ -275,7 +496,7 @@
             </div>
             
             <div class="form-group">
-                <label for="friends_circle_size">朋友圈规模：</label>
+                <label for="friends_circle_size"><i class="fas fa-user-friends"></i> 朋友圈规模：</label>
                 <select id="friends_circle_size" name="friends_circle_size" required>
                     <option value="">请选择</option>
                     <option value="0.1">少于10人</option>
@@ -287,7 +508,7 @@
             </div>
             
             <div class="form-group">
-                <label for="post_frequency">社交平台发布频率：</label>
+                <label for="post_frequency"><i class="fas fa-share-alt"></i> 社交平台发布频率：</label>
                 <select id="post_frequency" name="post_frequency" required>
                     <option value="">请选择</option>
                     <option value="0">从不发布</option>
@@ -298,30 +519,59 @@
                 </select>
             </div>
             
-            <button type="submit">预测性格类型</button>
+            <button type="submit"><i class="fas fa-brain"></i> 预测性格类型</button>
         </form>
         
         <div id="loading" class="loading">
             <div class="loading-spinner"></div>
-            <p>正在分析您的性格特征...</p>
+            <p>正在分析您的性格特征<span class="dots"></span></p>
         </div>
         
         <div id="result" class="result">
-            <div class="result-icon">🧠</div>
+            <div class="result-icon" id="result-icon"></div>
             <h2>预测结果</h2>
             <p id="prediction"></p>
             <div id="probability" class="probability"></div>
+            <div id="progress-container" class="progress-container">
+                <div class="progress-label">
+                    <span>内向型</span>
+                    <span>外向型</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+            <div id="traits-container" class="traits-container"></div>
             <div id="description" class="description"></div>
         </div>
     </div>
 
     <script>
+        // 为单选按钮添加选中效果
+        const radioOptions = document.querySelectorAll('.radio-option');
+        radioOptions.forEach(option => {
+            const radio = option.querySelector('input[type="radio"]');
+            radio.addEventListener('change', function() {
+                // 移除所有选中样式
+                radioOptions.forEach(opt => {
+                    if (opt.querySelector('input[name="' + this.name + '"]')) {
+                        opt.classList.remove('selected');
+                    }
+                });
+                // 添加选中样式
+                if (this.checked) {
+                    option.classList.add('selected');
+                }
+            });
+        });
+        
         document.getElementById('personalityForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             // 显示加载动画
             document.getElementById('loading').style.display = 'block';
             document.getElementById('result').style.display = 'none';
+            document.getElementById('result').classList.remove('show');
             
             // 获取表单数据
             const formData = {
@@ -370,27 +620,64 @@
             const predictionElement = document.getElementById('prediction');
             const probabilityElement = document.getElementById('probability');
             const descriptionElement = document.getElementById('description');
+            const progressFill = document.getElementById('progress-fill');
+            const traitsContainer = document.getElementById('traits-container');
+            const resultIcon = document.getElementById('result-icon');
             
             resultElement.style.display = 'block';
             resultElement.className = 'result';
             
+            // 使用setTimeout添加show类，触发动画
+            setTimeout(() => {
+                resultElement.classList.add('show');
+            }, 10);
+            
+            // 清空特质容器
+            traitsContainer.innerHTML = '';
+            
             if (data.prediction === 'Introvert') {
                 predictionElement.textContent = "内向型 (Introvert)";
-                descriptionElement.textContent = "内向的人通常更喜欢独处，在社交场合后需要时间恢复精力，倾向于深度思考和专注于内心世界。他们通常有较小但亲密的社交圈，并且在安静的环境中表现最佳。";
+                descriptionElement.innerHTML = "<strong>内向的人通常具有以下特点：</strong><br>更喜欢独处，在社交场合后需要时间恢复精力，倾向于深度思考和专注于内心世界。他们通常有较小但亲密的社交圈，善于倾听，在安静的环境中表现最佳，喜欢有意义的一对一交流。";
                 resultElement.classList.add('introvert');
+                resultIcon.innerHTML = '<i class="fas fa-book-reader"></i>';
+                progressFill.className = 'progress-fill introvert';
+                
+                // 添加内向型特质标签
+                const introvertTraits = ['深度思考', '善于倾听', '独立自主', '专注力强', '深度关系', '内省'];
+                introvertTraits.forEach(trait => {
+                    const traitElement = document.createElement('div');
+                    traitElement.className = 'trait introvert';
+                    traitElement.innerHTML = `<i class="fas fa-check-circle"></i> ${trait}`;
+                    traitsContainer.appendChild(traitElement);
+                });
                 
                 if (data.probability) {
                     const introvertProb = (data.probability.Introvert * 100).toFixed(1);
-                    probabilityElement.textContent = `预测置信度: ${introvertProb}%`;
+                    const extrovertProb = (data.probability.Extrovert * 100).toFixed(1);
+                    probabilityElement.innerHTML = `<strong>预测置信度:</strong> ${introvertProb}%`;
+                    progressFill.style.width = `${introvertProb}%`;
                 }
             } else {
                 predictionElement.textContent = "外向型 (Extrovert)";
-                descriptionElement.textContent = "外向的人通常从社交互动中获取能量，喜欢与他人交流，有较大的社交圈，并且倾向于行动导向。他们通常思考时会说出来，在团队环境中表现最佳，喜欢尝试新事物。";
+                descriptionElement.innerHTML = "<strong>外向的人通常具有以下特点：</strong><br>从社交互动中获取能量，喜欢与他人交流，有较大的社交圈，倾向于行动导向。他们通常思考时会说出来，在团队环境中表现最佳，喜欢尝试新事物，善于建立广泛的人际网络。";
                 resultElement.classList.add('extrovert');
+                resultIcon.innerHTML = '<i class="fas fa-users"></i>';
+                progressFill.className = 'progress-fill extrovert';
+                
+                // 添加外向型特质标签
+                const extrovertTraits = ['社交活跃', '表达力强', '冒险精神', '团队合作', '乐观开朗', '适应力强'];
+                extrovertTraits.forEach(trait => {
+                    const traitElement = document.createElement('div');
+                    traitElement.className = 'trait extrovert';
+                    traitElement.innerHTML = `<i class="fas fa-check-circle"></i> ${trait}`;
+                    traitsContainer.appendChild(traitElement);
+                });
                 
                 if (data.probability) {
                     const extrovertProb = (data.probability.Extrovert * 100).toFixed(1);
-                    probabilityElement.textContent = `预测置信度: ${extrovertProb}%`;
+                    const introvertProb = (data.probability.Introvert * 100).toFixed(1);
+                    probabilityElement.innerHTML = `<strong>预测置信度:</strong> ${extrovertProb}%`;
+                    progressFill.style.width = `${extrovertProb}%`;
                 }
             }
             
