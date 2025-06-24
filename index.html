@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性格类型预测</title>
+    <style>
+        :root {
+            --primary-color: #6a5acd;
+            --secondary-color: #9370db;
+            --accent-color: #483d8b;
+            --light-color: #e6e6fa;
+            --dark-color: #191970;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--light-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #555;
+        }
+        
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.2);
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-option input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result h2 {
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+        
+        .result p {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .result.introvert {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .result.extrovert {
+            background-color: #fff8e1;
+            border: 1px solid #ffecb3;
+        }
+        
+        .result-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .description {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .probability {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>性格类型预测</h1>
+        <form id="personalityForm">
+            <div class="form-group">
+                <label for="time_spent_alone">独处时间占比：</label>
+                <select id="time_spent_alone" name="time_spent_alone" required>
+                    <option value="">请选择</option>
+                    <option value="0.1">0-20% (大部分时间与他人相处)</option>
+                    <option value="0.3">20-40%</option>
+                    <option value="0.5">40-60%</option>
+                    <option value="0.7">60-80%</option>
+                    <option value="0.9">超过80% (几乎大部分时间独处)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>公开场合紧张程度：</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="stagefear1" name="stage_fear" value="No" required>
+                        <label for="stagefear1">1 = 完全不紧张</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="stagefear2" name="stage_fear" value="No">
+                        <label for="stagefear2">2 = 轻微紧张</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="stagefear3" name="stage_fear" value="No">
+                        <label for="stagefear3">3 = 中等紧张</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="stagefear4" name="stage_fear" value="Yes">
+                        <label for="stagefear4">4 = 较紧张</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="stagefear5" name="stage_fear" value="Yes">
+                        <label for="stagefear5">5 = 极度紧张</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="social_event_attendance">社交活动参与频率：</label>
+                <select id="social_event_attendance" name="social_event_attendance" required>
+                    <option value="">请选择</option>
+                    <option value="0.1">每月少于1次</option>
+                    <option value="0.3">每周1-2次</option>
+                    <option value="0.6">每周3-5次</option>
+                    <option value="0.8">每天1次</option>
+                    <option value="1">每天多次</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="going_outside">外出频率：</label>
+                <select id="going_outside" name="going_outside" required>
+                    <option value="">请选择</option>
+                    <option value="0.1">几乎不出门</option>
+                    <option value="0.3">每周1-2次</option>
+                    <option value="0.6">每周3-5次</option>
+                    <option value="0.8">每天1次</option>
+                    <option value="1">每天多次</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>社交后疲惫程度：</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="drained1" name="drained_after_socializing" value="No" required>
+                        <label for="drained1">1 = 充满能量</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="drained2" name="drained_after_socializing" value="No">
+                        <label for="drained2">2 = 轻微疲惫</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="drained3" name="drained_after_socializing" value="No">
+                        <label for="drained3">3 = 中等疲惫</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="drained4" name="drained_after_socializing" value="Yes">
+                        <label for="drained4">4 = 较疲惫</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="drained5" name="drained_after_socializing" value="Yes">
+                        <label for="drained5">5 = 极度疲惫</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="friends_circle_size">朋友圈规模：</label>
+                <select id="friends_circle_size" name="friends_circle_size" required>
+                    <option value="">请选择</option>
+                    <option value="0.1">少于10人</option>
+                    <option value="0.3">10-30人</option>
+                    <option value="0.5">30-50人</option>
+                    <option value="0.7">50-100人</option>
+                    <option value="0.9">100人以上</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="post_frequency">社交平台发布频率：</label>
+                <select id="post_frequency" name="post_frequency" required>
+                    <option value="">请选择</option>
+                    <option value="0">从不发布</option>
+                    <option value="0.2">每月1-2次</option>
+                    <option value="0.5">每周1-2次</option>
+                    <option value="0.8">每天1次</option>
+                    <option value="1">每天多次</option>
+                </select>
+            </div>
+            
+            <button type="submit">预测性格类型</button>
+        </form>
+        
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在分析您的性格特征...</p>
+        </div>
+        
+        <div id="result" class="result">
+            <div class="result-icon">🧠</div>
+            <h2>预测结果</h2>
+            <p id="prediction"></p>
+            <div id="probability" class="probability"></div>
+            <div id="description" class="description"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('personalityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 显示加载动画
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            
+            // 获取表单数据
+            const formData = {
+                time_spent_alone: parseFloat(document.getElementById('time_spent_alone').value),
+                stage_fear: document.querySelector('input[name="stage_fear"]:checked').value,
+                social_event_attendance: parseFloat(document.getElementById('social_event_attendance').value),
+                going_outside: parseFloat(document.getElementById('going_outside').value),
+                drained_after_socializing: document.querySelector('input[name="drained_after_socializing"]:checked').value,
+                friends_circle_size: parseFloat(document.getElementById('friends_circle_size').value),
+                post_frequency: parseFloat(document.getElementById('post_frequency').value)
+            };
+            
+            // 如果后端API可用，则使用API进行预测
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // 本地开发环境 - 调用API
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displayResult(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // 如果API调用失败，回退到前端预测
+                    fallbackPrediction(formData);
+                });
+            } else {
+                // 非本地环境或API不可用 - 使用前端预测
+                setTimeout(() => {
+                    fallbackPrediction(formData);
+                }, 1000); // 添加延迟以模拟API调用
+            }
+        });
+        
+        function displayResult(data) {
+            // 隐藏加载动画
+            document.getElementById('loading').style.display = 'none';
+            
+            // 显示结果
+            const resultElement = document.getElementById('result');
+            const predictionElement = document.getElementById('prediction');
+            const probabilityElement = document.getElementById('probability');
+            const descriptionElement = document.getElementById('description');
+            
+            resultElement.style.display = 'block';
+            resultElement.className = 'result';
+            
+            if (data.prediction === 'Introvert') {
+                predictionElement.textContent = "内向型 (Introvert)";
+                descriptionElement.textContent = "内向的人通常更喜欢独处，在社交场合后需要时间恢复精力，倾向于深度思考和专注于内心世界。他们通常有较小但亲密的社交圈，并且在安静的环境中表现最佳。";
+                resultElement.classList.add('introvert');
+                
+                if (data.probability) {
+                    const introvertProb = (data.probability.Introvert * 100).toFixed(1);
+                    probabilityElement.textContent = `预测置信度: ${introvertProb}%`;
+                }
+            } else {
+                predictionElement.textContent = "外向型 (Extrovert)";
+                descriptionElement.textContent = "外向的人通常从社交互动中获取能量，喜欢与他人交流，有较大的社交圈，并且倾向于行动导向。他们通常思考时会说出来，在团队环境中表现最佳，喜欢尝试新事物。";
+                resultElement.classList.add('extrovert');
+                
+                if (data.probability) {
+                    const extrovertProb = (data.probability.Extrovert * 100).toFixed(1);
+                    probabilityElement.textContent = `预测置信度: ${extrovertProb}%`;
+                }
+            }
+            
+            // 滚动到结果区域
+            resultElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function fallbackPrediction(formData) {
+            // 简单预测逻辑 (基于规则的简化版)
+            let introvertScore = 0;
+            let extrovertScore = 0;
+            
+            // 独处时间
+            if (formData.time_spent_alone > 0.6) introvertScore += 2;
+            else if (formData.time_spent_alone < 0.4) extrovertScore += 2;
+            else introvertScore += 1;
+            
+            // 舞台恐惧
+            if (formData.stage_fear === "Yes") introvertScore += 2;
+            else extrovertScore += 1;
+            
+            // 社交活动
+            if (formData.social_event_attendance > 0.7) extrovertScore += 2;
+            else if (formData.social_event_attendance < 0.3) introvertScore += 2;
+            else extrovertScore += 1;
+            
+            // 外出频率
+            if (formData.going_outside > 0.7) extrovertScore += 1;
+            else if (formData.going_outside < 0.3) introvertScore += 1;
+            
+            // 社交后疲惫
+            if (formData.drained_after_socializing === "Yes") introvertScore += 2;
+            else extrovertScore += 2;
+            
+            // 朋友圈大小
+            if (formData.friends_circle_size > 0.7) extrovertScore += 2;
+            else if (formData.friends_circle_size < 0.3) introvertScore += 2;
+            else extrovertScore += 1;
+            
+            // 发帖频率
+            if (formData.post_frequency > 0.7) extrovertScore += 1;
+            else if (formData.post_frequency < 0.3) introvertScore += 1;
+            
+            // 计算概率
+            const total = introvertScore + extrovertScore;
+            const introvertProb = introvertScore / total;
+            const extrovertProb = extrovertScore / total;
+            
+            // 确定结果
+            const prediction = introvertScore > extrovertScore ? 'Introvert' : 'Extrovert';
+            const probability = {
+                'Introvert': introvertProb,
+                'Extrovert': extrovertProb
+            };
+            
+            // 显示结果
+            displayResult({
+                prediction: prediction,
+                probability: probability
+            });
+        }
+    </script>
+</body>
+</html>
