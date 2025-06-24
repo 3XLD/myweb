@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>性格类型预测</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         :root {
             --primary-color: #6a5acd;
@@ -99,6 +99,13 @@
         }
         
         label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        /* 备用图标类，用于在Font Awesome加载失败时显示Unicode图标 */
+        .unicode-icon {
+            font-family: sans-serif;
             margin-right: 8px;
             color: var(--primary-color);
         }
@@ -372,20 +379,23 @@
             margin-top: 15px;
         }
         
+        /* 优化的点动画，使用纯CSS实现 */
         .loading .dots {
             display: inline-block;
+            width: 20px;
+            text-align: left;
         }
         
         .loading .dots::after {
-            content: '';
-            animation: dots 1.5s infinite;
+            content: '.';
+            animation: dots 1.5s steps(4, end) infinite;
         }
         
         @keyframes dots {
-            0% { content: '.'; }
-            33% { content: '..'; }
-            66% { content: '...'; }
-            100% { content: '.'; }
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
         }
         
         @media (max-width: 600px) {
@@ -408,7 +418,7 @@
         </p>
         <form id="personalityForm">
             <div class="form-group">
-                <label for="time_spent_alone"><i class="fas fa-user"></i> 独处时间占比：</label>
+                <label for="time_spent_alone"><i class="fas fa-user"></i><span class="unicode-icon" style="display:none;">👤</span> 独处时间占比：</label>
                 <select id="time_spent_alone" name="time_spent_alone" required>
                     <option value="">请选择</option>
                     <option value="0.1">0-20% (大部分时间与他人相处)</option>
@@ -420,7 +430,7 @@
             </div>
             
             <div class="form-group">
-                <label><i class="fas fa-users"></i> 公开场合紧张程度：</label>
+                <label><i class="fas fa-users"></i><span class="unicode-icon" style="display:none;">👥</span> 公开场合紧张程度：</label>
                 <div class="radio-group">
                     <div class="radio-option">
                         <input type="radio" id="stagefear1" name="stage_fear" value="No" required>
@@ -446,7 +456,7 @@
             </div>
             
             <div class="form-group">
-                <label for="social_event_attendance"><i class="fas fa-calendar-alt"></i> 社交活动参与频率：</label>
+                <label for="social_event_attendance"><i class="fas fa-calendar-alt"></i><span class="unicode-icon" style="display:none;">📅</span> 社交活动参与频率：</label>
                 <select id="social_event_attendance" name="social_event_attendance" required>
                     <option value="">请选择</option>
                     <option value="0.1">每月少于1次</option>
@@ -458,7 +468,7 @@
             </div>
             
             <div class="form-group">
-                <label for="going_outside"><i class="fas fa-walking"></i> 外出频率：</label>
+                <label for="going_outside"><i class="fas fa-walking"></i><span class="unicode-icon" style="display:none;">🚶</span> 外出频率：</label>
                 <select id="going_outside" name="going_outside" required>
                     <option value="">请选择</option>
                     <option value="0.1">几乎不出门</option>
@@ -470,7 +480,7 @@
             </div>
             
             <div class="form-group">
-                <label><i class="fas fa-battery-half"></i> 社交后疲惫程度：</label>
+                <label><i class="fas fa-battery-half"></i><span class="unicode-icon" style="display:none;">🔋</span> 社交后疲惫程度：</label>
                 <div class="radio-group">
                     <div class="radio-option">
                         <input type="radio" id="drained1" name="drained_after_socializing" value="No" required>
@@ -496,7 +506,7 @@
             </div>
             
             <div class="form-group">
-                <label for="friends_circle_size"><i class="fas fa-user-friends"></i> 朋友圈规模：</label>
+                <label for="friends_circle_size"><i class="fas fa-user-friends"></i><span class="unicode-icon" style="display:none;">👫</span> 朋友圈规模：</label>
                 <select id="friends_circle_size" name="friends_circle_size" required>
                     <option value="">请选择</option>
                     <option value="0.1">少于10人</option>
@@ -508,7 +518,7 @@
             </div>
             
             <div class="form-group">
-                <label for="post_frequency"><i class="fas fa-share-alt"></i> 社交平台发布频率：</label>
+                <label for="post_frequency"><i class="fas fa-share-alt"></i><span class="unicode-icon" style="display:none;">📱</span> 社交平台发布频率：</label>
                 <select id="post_frequency" name="post_frequency" required>
                     <option value="">请选择</option>
                     <option value="0">从不发布</option>
@@ -519,7 +529,7 @@
                 </select>
             </div>
             
-            <button type="submit"><i class="fas fa-brain"></i> 预测性格类型</button>
+            <button type="submit"><i class="fas fa-brain"></i><span class="unicode-icon" style="display:none;">🧠</span> 预测性格类型</button>
         </form>
         
         <div id="loading" class="loading">
@@ -547,6 +557,23 @@
     </div>
 
     <script>
+        // 检查Font Awesome是否加载成功，如果失败则显示Unicode图标
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                // 检查Font Awesome是否加载成功
+                const testIcon = document.querySelector('.fas');
+                if (!testIcon || window.getComputedStyle(testIcon, ':before').content === 'none' || window.getComputedStyle(testIcon, ':before').content === '') {
+                    // Font Awesome加载失败，显示Unicode图标
+                    document.querySelectorAll('.unicode-icon').forEach(function(icon) {
+                        icon.style.display = 'inline';
+                    });
+                    document.querySelectorAll('.fas').forEach(function(icon) {
+                        icon.style.display = 'none';
+                    });
+                }
+            }, 1000);
+        });
+
         // 为单选按钮添加选中效果
         const radioOptions = document.querySelectorAll('.radio-option');
         radioOptions.forEach(option => {
@@ -584,31 +611,10 @@
                 post_frequency: parseFloat(document.getElementById('post_frequency').value)
             };
             
-            // 如果后端API可用，则使用API进行预测
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                // 本地开发环境 - 调用API
-                fetch('/predict', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    displayResult(data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // 如果API调用失败，回退到前端预测
-                    fallbackPrediction(formData);
-                });
-            } else {
-                // 非本地环境或API不可用 - 使用前端预测
-                setTimeout(() => {
-                    fallbackPrediction(formData);
-                }, 1000); // 添加延迟以模拟API调用
-            }
+            // 在GitHub Pages上，直接使用前端预测
+            setTimeout(() => {
+                fallbackPrediction(formData);
+            }, 1000); // 添加延迟以模拟处理时间
         });
         
         function displayResult(data) {
@@ -639,7 +645,7 @@
                 predictionElement.textContent = "内向型 (Introvert)";
                 descriptionElement.innerHTML = "<strong>内向的人通常具有以下特点：</strong><br>更喜欢独处，在社交场合后需要时间恢复精力，倾向于深度思考和专注于内心世界。他们通常有较小但亲密的社交圈，善于倾听，在安静的环境中表现最佳，喜欢有意义的一对一交流。";
                 resultElement.classList.add('introvert');
-                resultIcon.innerHTML = '<i class="fas fa-book-reader"></i>';
+                resultIcon.innerHTML = '<i class="fas fa-book-reader"></i><span class="unicode-icon" style="display:none;">📚</span>';
                 progressFill.className = 'progress-fill introvert';
                 
                 // 添加内向型特质标签
@@ -647,7 +653,7 @@
                 introvertTraits.forEach(trait => {
                     const traitElement = document.createElement('div');
                     traitElement.className = 'trait introvert';
-                    traitElement.innerHTML = `<i class="fas fa-check-circle"></i> ${trait}`;
+                    traitElement.innerHTML = `<i class="fas fa-check-circle"></i><span class="unicode-icon" style="display:none;">✓</span> ${trait}`;
                     traitsContainer.appendChild(traitElement);
                 });
                 
@@ -661,7 +667,7 @@
                 predictionElement.textContent = "外向型 (Extrovert)";
                 descriptionElement.innerHTML = "<strong>外向的人通常具有以下特点：</strong><br>从社交互动中获取能量，喜欢与他人交流，有较大的社交圈，倾向于行动导向。他们通常思考时会说出来，在团队环境中表现最佳，喜欢尝试新事物，善于建立广泛的人际网络。";
                 resultElement.classList.add('extrovert');
-                resultIcon.innerHTML = '<i class="fas fa-users"></i>';
+                resultIcon.innerHTML = '<i class="fas fa-users"></i><span class="unicode-icon" style="display:none;">👥</span>';
                 progressFill.className = 'progress-fill extrovert';
                 
                 // 添加外向型特质标签
@@ -669,7 +675,7 @@
                 extrovertTraits.forEach(trait => {
                     const traitElement = document.createElement('div');
                     traitElement.className = 'trait extrovert';
-                    traitElement.innerHTML = `<i class="fas fa-check-circle"></i> ${trait}`;
+                    traitElement.innerHTML = `<i class="fas fa-check-circle"></i><span class="unicode-icon" style="display:none;">✓</span> ${trait}`;
                     traitsContainer.appendChild(traitElement);
                 });
                 
